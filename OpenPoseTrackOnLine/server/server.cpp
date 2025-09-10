@@ -46,7 +46,7 @@ void Server::recvFromClient(int sock) {
                 m_recvInfos[sock].header.insert(m_recvInfos[sock].header.end(), m_recvInfos[sock].head_buffer.begin(), m_recvInfos[sock].head_buffer.begin()+m_recvInfos[sock].curRecvHeadSize);
                 m_recvInfos[sock].head_recv_length += m_recvInfos[sock].curRecvHeadSize;
             }
-            std::cout << m_recvInfos[sock].header.size() << std::endl;
+            //std::cout << m_recvInfos[sock].header.size() << std::endl;
             m_recvInfos[sock].needSize = _8To32(m_recvInfos[sock].header);
         }
         else{
@@ -70,7 +70,7 @@ void Server::recvFromClient(int sock) {
             }
             m_recvInfos[sock].clear();
         }
-        std::cout << m_recvInfos[sock].recvedSize << ", " << m_recvInfos[sock].needSize << std::endl;
+        //std::cout << m_recvInfos[sock].recvedSize << ", " << m_recvInfos[sock].needSize << std::endl;
 
         //std::cout << "m_queue size is:  " << m_queue.size() << std::endl;
     }
@@ -101,14 +101,18 @@ void Server::vecToMat(int sock, std::vector<uint8_t>&& data_vec){
     cv::Mat image;
     ImageData myData = ImageData::decode(data_vec);
     image = myData.getImage().clone();
-    m_queue_mats[sock].emplace(image);
+    {
+        std::unique_lock<std::mutex> lock_mat(*m_queue_mats_mutexs[sock]);
+        m_queue_mats[sock].emplace(image);
+        m_queue_mats_conditions[sock]->notify_one();
+    }
     
 
-    // cv::imwrite("../saveimages/" +
-    //              std::to_string(sock) +
-    //              "_" +
-    //              std::to_string(m_recv_counts[sock].load()) +
-    //              ".jpg", image);
+    cv::imwrite("../saveimages/" +
+                 std::to_string(sock) +
+                 "_" +
+                 std::to_string(m_recv_counts[sock].load()) +
+                 ".jpg", image);
 
     ++m_recv_counts[sock];
 }
@@ -167,6 +171,8 @@ void Server::disPatcher() {
                 m_recv_flags[client_sock] = false;
                 m_queues[client_sock] = std::queue<std::vector<uint8_t>>{};
                 m_queue_mats[client_sock] = std::queue<cv::Mat>{};
+                m_queue_mats_mutexs[client_sock] = std::make_unique<std::mutex>();
+                m_queue_mats_conditions[client_sock] = std::make_unique<std::condition_variable>();
                 m_recv_counts[client_sock].store(0);
 
                 std::cout << "new Connection" << client_sock << std::endl;
@@ -174,7 +180,8 @@ void Server::disPatcher() {
                 //每有一个新连接，就创建一个recv线程
                 //m_recv_pool.submit_void([this, client_sock] () { this->getData(client_sock);});
                 recvThreads.push_back(std::thread(&Server::getData, this, client_sock));
-                openposeThreads.push_back(std::thread(&IProcessor::process, iproc, std::ref(*this), client_sock));
+                openposeThreads.push_back(std::thread(&IProcessor::process, iprocess, std::ref(*this), client_sock));
+                std::cout << openposeThreads.size() << std::endl;
                 conneNums++;
 
             } else{

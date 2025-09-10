@@ -1,6 +1,7 @@
 #ifndef PROCESSOR_H
 #define PROCESSOR_H
 
+#include "server/server.h"
 
 class Server;
 

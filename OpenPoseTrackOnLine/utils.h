@@ -29,7 +29,7 @@ extern std::string weightsFile;
 extern const int nPoints;
 
 #define MPT
-#define SERIAL
+#define PARALLEL_CALLBACK
 
 #ifdef COCO
 extern const int POSE_PAIRS[17][2];

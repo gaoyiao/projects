@@ -15,7 +15,7 @@ int main()
 #ifdef PARALLEL_CALLBACK
     cv::setNumThreads(1);
 #endif
-    //OpenPoseTrack opt(368, 368, 12, 0.1, "CPU", camUrl);
+    //OpenPoseTrack opt(368, 368, 12, 0.1, "GPU", camUrl);
     //Client client(Addr, port, homepath);
 
     /*
@@ -28,16 +28,18 @@ int main()
     t2.join();
     */
 
-    auto iproc = std::unique_ptr<OpenPose>(368, 368, 12, 0.1, "CPU", camUrl);
+    auto iproc = std::make_unique<OpenPoseTrack>(368, 368, 12, 0.1, "GPU", camUrl);
+    
     Server server(Addr, port, std::move(iproc.get()));
     int flag = server.createConnection();
     server.disPatcher();
+    
     //std::thread t1(&Server::disPatcher, &server);
     //std::thread t2(&Server::getData, &server);
 
     //t1.join();
     //t2.join();
-    std::cout << flag << std::endl;
+    //std::cout << flag << std::endl;
     return 0;
 
 }

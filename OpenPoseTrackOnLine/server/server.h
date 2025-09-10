@@ -26,6 +26,8 @@
 #include "../OpenPose/openposetrack.h"
 #include "../processor.h"
 
+class IProcessor;
+
 struct recvInfo{
     std::vector<uint8_t> head_buffer;
     std::vector<uint8_t> buffer;
@@ -80,6 +82,8 @@ private:
 
     std::unordered_map<int, std::queue<std::vector<uint8_t>>> m_queues;
     std::unordered_map<int ,std::queue<cv::Mat>> m_queue_mats;
+    std::unordered_map<int, std::unique_ptr<std::mutex>> m_queue_mats_mutexs;
+    std::unordered_map<int, std::unique_ptr<std::condition_variable>> m_queue_mats_conditions;
 
     //recvInfo recvinfo;
     uint32_t headLength{4};
@@ -130,6 +134,14 @@ public:
     void getData(int sock);
 
     std::queue<cv::Mat>& getMats(int sock) { return m_queue_mats[sock];}
+
+    std::unique_ptr<std::mutex>& getMatLock(int sock) {
+        return m_queue_mats_mutexs[sock];
+    }
+
+    std::unique_ptr<std::condition_variable>& getMatConditions(int sock){
+        return m_queue_mats_conditions[sock];
+    }
 
 
 };

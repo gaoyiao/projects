@@ -14,7 +14,7 @@ OpenPoseTrack::OpenPoseTrack(int h, int w, int tnum, float th, std::string devic
         camera_url(camurl),
         pool(tnum),
         Nets(std::vector<cv::dnn::Net>(tnum)){
-    pool.init();
+    //pool.init();
     netInit();
 
 }
@@ -87,21 +87,26 @@ void OpenPoseTrack::handleRawImages(Server& server, int sock){
     //int m_id = 0;
     int count = 0;
     while(true) {
-        //std::cout << show_images.size() << std::endl;
+        std::cout << "curcular is working" << std::endl;
         {
-            std::unique_lock <std::mutex> lock(lock_raw);
+            std::unique_lock <std::mutex> lock(*(server.getMatLock(sock))); //这里面的lock_raw应该由server提供，e.g server.getLock()
             if (isRuning && server.getMats(sock).empty()) {
-                m_condition_lock.wait(lock);
-                //std::cout << "raw_images is empty, but still running" << std::endl;
+                std::cout << "raw_images is empty, but still running" << std::endl;
+                //m_condition_lock.wait(lock); 
+                (server.getMatConditions(sock))->wait(lock);
+                
                 continue;
             } else if (!isRuning && server.getMats(sock).empty()) {
                 std::cout << "done" << std::endl;
                 break;
             }
+            std::cout << "begin handle" << std::endl;
             raw_image = server.getMats(sock).front();
-            server.getMats(sock).pop_front();
+            server.getMats(sock).pop();
         }
+        std::cout << "get input raw is Working" << std::endl;
 #ifdef SERIAL
+        std::cout << "It's working with serial mode" << std::endl;
         cv::Mat out_end = handle(raw_image, this->Nets[0]);
         cv::imwrite("../images/" + std::to_string(count) + ".jpg", out_end);
 #elif defined(PARALLEL_FUTURE)
