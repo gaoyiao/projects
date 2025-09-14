@@ -3,6 +3,7 @@
 //
 
 #include "server.h"
+#include "../processor.h"
 
 int Server::createConnection() {
 
@@ -192,4 +193,8 @@ void Server::disPatcher() {
             }
         }
     }
+}
+
+void Server::realTimeShow() {
+    iprocess->show();
 }

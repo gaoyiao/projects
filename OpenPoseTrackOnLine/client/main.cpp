@@ -17,11 +17,12 @@ int main()
     int flag = client.createConnect();
 
     if(flag > 0){
-        std::thread t1(&Client::readFromCameraAndDataGenerator, &client);
+        //std::thread t1(&Client::readFromCameraAndDataGenerator, &client);
         std::thread t2(&Client::sendData, &client);
         std::thread t3(&Client::recvMessage, &client);
+        client.readFromCameraAndDataGenerator();
 
-        t1.join();
+        //t1.join();
         t2.join();
         t3.join();
     }

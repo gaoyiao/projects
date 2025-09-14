@@ -232,6 +232,32 @@ cv::Mat OpenPoseTrack::generateKeypointMap(cv::Mat image, std::vector<cv::Point2
 
 void OpenPoseTrack::callBack(cv::Mat& image, int count){
     cv::imwrite("../images/" + std::to_string(count) + ".jpg", image);
+    {
+        std::unique_lock<std::mutex> lock(m_lock_handled);
+        m_handled_images.emplace(std::move(image));
+        m_condition_handled.notify_one();
+    }
 }
+
+
+void OpenPoseTrack::show() {
+    cv::Mat show_image(1920, 1080, CV_8UC3, cv::Scalar(0, 0, 255));
+    //cv::Mat show_image;
+    while(true){
+        {
+            cv::imshow("handle", show_image);
+            if(cv::waitKey(1) == 'q') return;
+            std::unique_lock<std::mutex> lock(m_lock_handled);
+            m_condition_handled.wait(lock, [this]() { return !m_handled_images.empty();});
+            if(m_handled_images.empty()) continue;
+            show_image = std::move(m_handled_images.front());
+            m_handled_images.pop();
+            
+            //std::cout << "handle show ....................." << std::endl;
+        }
+    }
+}
+
+
 
 

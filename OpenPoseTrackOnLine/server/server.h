@@ -24,7 +24,7 @@
 #include "../data.h"
 #include "../thread_pool.h"
 #include "../OpenPose/openposetrack.h"
-#include "../processor.h"
+//#include "../processor.h"
 
 class IProcessor;
 
@@ -143,6 +143,7 @@ public:
         return m_queue_mats_conditions[sock];
     }
 
+    void realTimeShow();
 
 };
 

@@ -32,14 +32,18 @@ int main()
     
     Server server(Addr, port, std::move(iproc.get()));
     int flag = server.createConnection();
-    server.disPatcher();
-    
-    //std::thread t1(&Server::disPatcher, &server);
-    //std::thread t2(&Server::getData, &server);
+    //server.disPatcher();
+    std::thread t1(&Server::disPatcher, &server);
+    server.realTimeShow();
 
-    //t1.join();
-    //t2.join();
-    //std::cout << flag << std::endl;
+    if(t1.joinable()) t1.join();
+    
+    // std::thread t1(&Server::disPatcher, &server);
+    // std::thread t2(&Server::getData, &server);
+
+    // t1.join();
+    // t2.join();
+    // std::cout << flag << std::endl;
     return 0;
 
 }

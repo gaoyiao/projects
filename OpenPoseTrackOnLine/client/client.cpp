@@ -59,7 +59,10 @@ void Client::readFromCameraAndDataGenerator(){
         }
 
         image_clone = image.clone();
-        if(cv::waitKey(1) == 'q') return;
+        if(cv::waitKey(1) == 'q') {
+            cv::destroyWindow("camera");
+            return;
+        }
         cv::imshow("camera", image_clone);
         ImageData myImage(frame_index++, image_clone);
         data_vec = myImage.encode();

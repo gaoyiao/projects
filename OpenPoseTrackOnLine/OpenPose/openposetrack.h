@@ -46,6 +46,8 @@ public:
         handleRawImages(server, sock);
     }
 
+    void show() override;
+
 private:
     int inputNetHeight;
     int inputNetWidth;
@@ -71,6 +73,10 @@ private:
     std::mutex lock_shows;
 
     std::condition_variable m_condition_lock;
+
+    std::mutex m_lock_handled;
+    std::condition_variable m_condition_handled;
+    std::queue<cv::Mat> m_handled_images;
 
     //flag
     std::atomic<bool> isRuning{true};
