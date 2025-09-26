@@ -80,6 +80,11 @@ private:
     //std::queue<std::vector<uint8_t>> m_queue; //接收来自Client发送的数据，并拼接成完整的vector
     //std::queue<cv::Mat> m_queue_mat;
 
+    /*
+    TODO: 
+        是否将下面使用结构体放在一起更加高效，易读  by gaoyiao 2025/9/26 10:35
+    */
+
     std::unordered_map<int, std::queue<std::vector<uint8_t>>> m_queues;
     std::unordered_map<int ,std::queue<cv::Mat>> m_queue_mats;
     std::unordered_map<int, std::unique_ptr<std::mutex>> m_queue_mats_mutexs;
@@ -148,3 +153,4 @@ public:
 };
 
 #endif //LEARNOPENCV_SERVER_H
+
