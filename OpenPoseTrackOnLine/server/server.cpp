@@ -166,6 +166,10 @@ void Server::disPatcher() {
                 epoll_ctl(epfd, EPOLL_CTL_ADD, client_sock, &client_event);
                 setNonBlocking(client_sock);
 
+                /* 
+                TODO:
+                    结构体统一初始化 written by gaoyiao 2025/9/26 10:39
+                */
                 m_recv_mutexs[client_sock] = std::make_unique<std::mutex>();
                 m_recv_conditions[client_sock] = std::make_unique<std::condition_variable>();
                 m_recvInfos[client_sock] = recvInfo();
@@ -198,3 +202,4 @@ void Server::disPatcher() {
 void Server::realTimeShow() {
     iprocess->show();
 }
+
